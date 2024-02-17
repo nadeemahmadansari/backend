@@ -346,7 +346,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(400, "username is missing");
   }
 
-  User.aggregate([
+  const channel = await User.aggregate([
     { $match: { username: username?.toLowerCase() } },
     {
       $lookup: {
@@ -394,6 +394,16 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
+  if (!channel?.length) {
+    throw new ApiError(404, "channel does not exist");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User channel fetched successfully")
+    );
 });
 
 export {
